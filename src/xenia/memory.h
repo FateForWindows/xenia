@@ -319,6 +319,24 @@ class Memory {
   // Cancels a write watch requested with AddPhysicalAccessWatch.
   void CancelAccessWatch(uintptr_t watch_handle);
 
+  // Sets the default access watch callback for physical memory, which has a
+  // higher priority than watches - if it returns true, watches won't be
+  // triggered.
+  void SetGlobalPhysicalAccessWatch(cpu::GlobalAccessWatchCallback callback,
+                                    void* callback_context);
+
+  // Protects a physical memory range without adding a watch, primarily for use
+  // with the global physical access watch.
+  void ProtectPhysicalMemory(uint32_t physical_address, uint32_t length,
+                             cpu::MMIOHandler::WatchType type,
+                             bool protect_host_access);
+
+  // Unprotects a physical memory range previously protected using
+  // ProtectPhysicalMemory, primarily for use with the global physical access
+  // watch.
+  void UnprotectPhysicalMemory(uint32_t physical_address, uint32_t length,
+                               bool unprotect_host_access);
+
   // Allocates virtual memory from the 'system' heap.
   // System memory is kept separate from game memory but is still accessible
   // using normal guest virtual addresses. Kernel structures and other internal
