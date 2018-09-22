@@ -45,6 +45,11 @@ class ShaderTranslator {
   bool is_vertex_shader() const { return shader_type_ == ShaderType::kVertex; }
   // True if the current shader is a pixel shader.
   bool is_pixel_shader() const { return shader_type_ == ShaderType::kPixel; }
+  // True if the current shader addresses general-purpose registers with dynamic
+  // indices.
+  bool uses_register_dynamic_addressing() const {
+    return uses_register_dynamic_addressing_;
+  }
   // A list of all vertex bindings, populated before translation occurs.
   const std::vector<Shader::VertexBinding>& vertex_bindings() const {
     return vertex_bindings_;
@@ -143,10 +148,9 @@ class ShaderTranslator {
   void AppendUcodeDisasmFormat(const char* format, ...);
 
   bool TranslateBlocks();
-  void GatherBindingInformation(const ucode::ControlFlowInstruction& cf);
-  void GatherVertexBindingInformation(const ucode::VertexFetchInstruction& op);
-  void GatherTextureBindingInformation(
-      const ucode::TextureFetchInstruction& op);
+  void GatherInstructionInformation(const ucode::ControlFlowInstruction& cf);
+  void GatherVertexFetchInformation(const ucode::VertexFetchInstruction& op);
+  void GatherTextureFetchInformation(const ucode::TextureFetchInstruction& op);
   void TranslateControlFlowInstruction(const ucode::ControlFlowInstruction& cf);
   void TranslateControlFlowNop(const ucode::ControlFlowInstruction& cf);
   void TranslateControlFlowExec(const ucode::ControlFlowExecInstruction& cf);
@@ -216,6 +220,7 @@ class ShaderTranslator {
   uint32_t unique_texture_bindings_ = 0;
 
   Shader::ConstantRegisterMap constant_register_map_ = {0};
+  bool uses_register_dynamic_addressing_ = false;
   bool writes_color_targets_[4] = {false, false, false, false};
 
   static const AluOpcodeInfo alu_vector_opcode_infos_[0x20];
